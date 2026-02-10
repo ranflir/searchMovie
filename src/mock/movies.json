@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "title": "인셉션",
+    "tagline": "Your mind is the scene of the crime",
+    "overview": "타인의 꿈에 들어가 생각을 훔치는 특수 보안요원 코브. 그에게 생각을 심어야 하는 불가능한 미션이 주어진다.",
+    "releaseDate": "2010-07-21",
+    "genres": [
+      { "id": 28, "name": "SF" },
+      { "id": 12, "name": "액션" }
+    ],
+    "runtime": 148,
+    "posterPath": "/images/inception.jpg",
+    "voteAverage": 8.4
+  },
+  {
+    "id": 2,
+    "title": "다크 나이트",
+    "tagline": "Why So Serious?",
+    "overview": "배트맨과 짐 고든 반장, 그리고 하비 덴트 검사는 고담시의 범죄와 부패를 척결하기 위해 힘을 합친다. 그러나 조커의 등장으로 도시는 다시 혼란에 빠진다.",
+    "releaseDate": "2008-08-06",
+    "genres": [
+      { "id": 28, "name": "액션" },
+      { "id": 80, "name": "범죄" }
+    ],
+    "runtime": 152,
+    "posterPath": "/images/dark-knight.jpg",
+    "voteAverage": 9.0
+  },
+  {
+    "id": 3,
+    "title": "인터스텔라",
+    "tagline": "Mankind was born on Earth. It was never meant to die here.",
+    "overview": "세계 각국의 정부와 경제가 완전히 붕괴된 미래. 인류를 구하기 위해 우주로 떠나는 사람들의 이야기.",
+    "releaseDate": "2014-11-06",
+    "genres": [
+      { "id": 878, "name": "SF" },
+      { "id": 18, "name": "드라마" }
+    ],
+    "runtime": 169,
+    "posterPath": "/images/interstellar.jpg",
+    "voteAverage": 8.7
+  }
+]
