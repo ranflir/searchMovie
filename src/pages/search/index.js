@@ -1,47 +1,66 @@
-import { useRouter } from 'next/router';
-import MovieItem from '@/components/MovieItem';
-import SearchLayout from '@/components/layouts/SearchLayout';
-import { fetchMovies } from '@/lib/movie.server';
-import * as styles from '@/styles/home.css.js'; // 스타일 추가
+// src/pages/search/index.js
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import SearchLayout from "@/layouts/SearchLayout";
+import MovieItem from "@/components/MovieItem";
+import { fetchSearchMovies } from "@/lib/movie.client"; // ✅ 클라이언트 전용 Helper 사용
 
-// 3️⃣ Props로 서버에서 가져온 movies를 받습니다!
-export default function Search({ movies }) {
+export default function Search() {
+  const [movies, setMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { q } = router.query; // 브라우저 주소창에서 검색어 읽기
+  const { q } = router.query;
+
+  useEffect(() => {
+    // 1️⃣ 라우터가 준비되지 않았거나 검색어가 없으면 중단
+    if (!router.isReady || !q) return;
+
+    // 2️⃣ AbortController: 이전 요청 취소로 경쟁 상태(Race Condition) 해결
+    const controller = new AbortController();
+
+    setIsLoading(true);
+
+    const fetchSearchResults = async () => {
+      try {
+        // 3️⃣ Client-Side Fetcher 호출 (controller.signal 전달)
+        const movieData = await fetchSearchMovies(q, controller.signal);
+        setMovies(movieData);
+        // 여기서 로딩을 끄지 않음 (finally에서 처리)
+      } catch (error) {
+        // 중요: AbortError는 에러가 아닌 '취소'이므로 무시해야 함
+        if (error.name === "AbortError") return;
+        console.error(error);
+      } finally {
+        // 3️⃣ 유효한(취소되지 않은) 요청인 경우에만 로딩 종료
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchSearchResults();
+
+    // Cleanup: 쿼리가 바뀌거나 언마운트되면 이전 요청 "진짜로 취소"
+    return () => {
+      controller.abort();
+    };
+  }, [router.isReady, q]);
 
   return (
-    <div className={styles.container}>
-      <section>
-        {/* 4️⃣ 검색어가 있을 때만 제목을 보여줍니다 */}
-        <h3>{q ? `'${q}' 검색 결과` : '모든 영화'}</h3>
+    <div>
+      {/* 4️⃣ 로딩 상태 표시 (UX) */}
+      {isLoading ? (
+        <div style={{ padding: "20px", textAlign: "center" }}>Loading...</div>
+      ) : (
+        movies.map((movie) => <MovieItem key={movie.id} {...movie} />)
+      )}
 
-        <div className={styles.list}>
-          {/* 5️⃣ mock 데이터가 아닌, 서버에서 받은 movies를 사용합니다 */}
-          {movies.length > 0 ? (
-            movies.map((movie) => <MovieItem key={movie.id} {...movie} />)
-          ) : (
-            <p>검색 결과가 없습니다.</p>
-          )}
-        </div>
-      </section>
+      {/* 검색 결과가 없을 때의 UI */}
+      {!isLoading && movies.length === 0 && q && (
+        <div style={{ padding: "20px", textAlign: "center" }}>검색 결과가 없습니다.</div>
+      )}
     </div>
   );
 }
 
-Search.getLayout = (page) => {
-  return <SearchLayout>{page}</SearchLayout>;
-};
-
-// 1️⃣ 사용자가 접속하면 서버에서 가장 먼저 실행됩니다.
-export const getServerSideProps = async (context) => {
-  const { q } = context.query; // 쿼리 스트링 꺼내기 (q)
-
-  // 2️⃣ lib/movie.js의 함수를 이용해 서버에서 API를 호출합니다.
-  const movies = await fetchMovies({ q });
-
-  return {
-    props: {
-      movies, // 이 값이 위의 Search 컴포넌트의 인자로 들어갑니다.
-    },
-  };
-};
+Search.getLayout = (page) => <SearchLayout>{page}</SearchLayout>;
